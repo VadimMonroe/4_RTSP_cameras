@@ -40,10 +40,10 @@ def show_must_go_on() -> None:
                 img, t = audio_frame
 
             """Запись в файлы, включаем когда надо"""
-            # output[0].write(img1)
-            # output[1].write(img2)
-            # output[2].write(img3)
-            # output[3].write(img4)
+            output[0].write(img1)
+            output[1].write(img2)
+            output[2].write(img3)
+            output[3].write(img4)
         except Exception as E1:
             print('E1', E1)
             break
@@ -54,8 +54,10 @@ def show_must_go_on() -> None:
         key = cv2.waitKey(20)
         if (key == ord('q')) or key == 27:
             [_.release() for _ in list_cam]
+            [_.release() for _ in output]
             cv2.destroyAllWindows()
             break
 
 
-show_must_go_on()
+if __name__ == '__main__':
+    show_must_go_on()
