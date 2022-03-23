@@ -1,6 +1,17 @@
 from settings import *
 import cv2
 from ffpyplayer.player import MediaPlayer
+import sys
+
+"""
+system arguments variables:
+python cameras.py level_1
+
+examples:
+python cameras.py rec
+python cameras.py show
+"""
+command = sys.argv[1]
 
 
 def show_must_go_on() -> None:
@@ -31,19 +42,21 @@ def show_must_go_on() -> None:
             audio_frame, val = player.get_frame()
 
             """Показываем трансляцию"""
-            cv2.imshow("Hole", img1)
-            cv2.imshow("Gates", img2)
-            cv2.imshow("Car", img3)
-            cv2.imshow("Balcony", img4)
+            if command == 'show':
+                cv2.imshow("Hole", img1)
+                cv2.imshow("Gates", img2)
+                cv2.imshow("Car", img3)
+                cv2.imshow("Balcony", img4)
 
-            if val != 'eof' and audio_frame is not None:
-                img, t = audio_frame
+                if val != 'eof' and audio_frame is not None:
+                    img, t = audio_frame
 
             """Запись в файлы, включаем когда надо"""
-            output[0].write(img1)
-            output[1].write(img2)
-            output[2].write(img3)
-            output[3].write(img4)
+            if command == 'rec':
+                output[0].write(img1)
+                output[1].write(img2)
+                output[2].write(img3)
+                output[3].write(img4)
         except Exception as E1:
             print('E1', E1)
             break
