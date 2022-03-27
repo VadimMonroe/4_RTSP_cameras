@@ -1,3 +1,5 @@
+#!/Users/vadimmonroe/Desktop/Programming/_WORK_PROJECTS/4_RTSP_cameras/venv/bin/python3.9
+
 import sys
 
 from settings import *
@@ -16,9 +18,8 @@ command = 'show' if len(sys.argv) == 1 else sys.argv[1]
 
 
 def show_must_go_on() -> None:
-    cameras = [f'rtsp://{ip_cam_1}:554/user={login}&password={password}&channel={_}' \
-               f'&stream=0.sdp?real_stream--rtp-caching=100' for _ in range(1, 5)]
-    cameras.append(f'rtsp://{ip_cam_2}:554/user={login}&password={password}&channel=1&stream=100.sdp')
+    cameras = [f'rtsp://{ip_cam[0]}:554/user={login}&password={password}&channel={_}&stream=0.sdp' for _ in range(1, 5)]
+    cameras.append(f'rtsp://{ip_cam[1]}:554/user={login}&password={password}&channel=1&stream=0.sdp')
 
     list_cam = [cv2.VideoCapture(_) for _ in cameras]
 
@@ -31,45 +32,28 @@ def show_must_go_on() -> None:
     player = MediaPlayer(cameras[3])
 
     while True:
-        _, img11 = list_cam[0].read()
-        _, img22 = list_cam[1].read()
-        _, img33 = list_cam[2].read()
-        _, img44 = list_cam[3].read()
-        _, img55 = list_cam[4].read()
-
         try:
-            img1 = cv2.resize(img11, (360, 240))
-            img2 = cv2.resize(img22, (360, 240))
-            img3 = cv2.resize(img33, (360, 240))
-            img4 = cv2.resize(img44, (360, 240))
-            img5 = cv2.resize(img55, (360, 240))
+            for num, cam in enumerate(list_cam):
+                working, img = list_cam[num].read()
+                if working:
+                    img = cv2.resize(img, (360, 240))
+                    audio_frame, val = player.get_frame()
+                    if command == 'show':
+                        cv2.imshow(str(num), img)
+                        if val != 'eof' and audio_frame is not None:
+                            img342, t = audio_frame
+                    if command == 'rec':
+                        output[num].write(img)
+                else:
+                    list_cam[num] = cv2.VideoCapture(cameras[num])
+                # print(num, list_cam[num], working)
 
-            audio_frame, val = player.get_frame()
-
-            """Показываем трансляцию"""
-            if command == 'show':
-                cv2.imshow("Hole", img1)
-                cv2.imshow("Gates", img2)
-                cv2.imshow("Car", img3)
-                cv2.imshow("Balcony", img4)
-                cv2.imshow("GuestRoom", img5)
-
-                if val != 'eof' and audio_frame is not None:
-                    img342, t = audio_frame
-
-            """Запись в файлы, включаем когда надо"""
-            if command == 'rec':
-                output[0].write(img1)
-                output[1].write(img2)
-                output[2].write(img3)
-                output[3].write(img4)
-                output[4].write(img5)
         except Exception as E1:
             print('E1', E1)
             break
 
         file_count += 1
-        print('Кадр {0:04d}'.format(file_count))
+        # print('Кадр {0:04d}'.format(file_count))
 
         key = cv2.waitKey(20)
         if (key == ord('q')) or key == 27:
